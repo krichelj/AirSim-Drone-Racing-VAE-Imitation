@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 
+
 def calculate_gate_stats(predictions, poses):
     # display averages
     mean_pred = np.mean(predictions, axis=0)
@@ -9,9 +10,9 @@ def calculate_gate_stats(predictions, poses):
     print('Means (prediction, GT) : R({} , {}) Theta({} , {}) Psi({} , {}) Phi_rel({} , {})'.format(
         mean_pred[0], mean_pose[0], mean_pred[1], mean_pose[1], mean_pred[2], mean_pose[2], mean_pred[3], mean_pose[3]))
     # display mean absolute error
-    abs_diff = np.abs(predictions-poses)
+    abs_diff = np.abs(predictions - poses)
     mae = np.mean(abs_diff, axis=0)
-    mae[1:] = mae[1:] * 180/np.pi
+    mae[1:] = mae[1:] * 180 / np.pi
     print('MAE : R({}) Theta({}) Psi({}) Phi_rel({})'.format(mae[0], mae[1], mae[2], mae[3]))
     # display standard deviation of error
     std = np.std(abs_diff, axis=0) / np.sqrt(abs_diff.shape[0])
@@ -22,12 +23,15 @@ def calculate_gate_stats(predictions, poses):
     print('Max error : R({}) Theta({}) Psi({}) Phi_rel({})'.format(max_diff[0], max_diff[1], max_diff[2], max_diff[3]))
 
     fig, axs = plt.subplots(1, 4, tight_layout=True)
-    weights = np.ones(len(abs_diff[:, 0]))/len(abs_diff[:, 0])
+    weights = np.ones(len(abs_diff[:, 0])) / len(abs_diff[:, 0])
 
-    axs[0].hist(abs_diff[:, 0], bins=30, range=(0,2.0), weights=weights, density=False)
-    axs[1].hist(abs_diff[:, 1]*180/np.pi, bins=30, range=(0, np.pi/20*180/np.pi), weights=weights, density=False)
-    axs[2].hist(abs_diff[:, 2]*180/np.pi, bins=30, range=(0, np.pi/20*180/np.pi), weights=weights, density=False)
-    axs[3].hist(abs_diff[:, 3]*180/np.pi, bins=50, range=(0, np.pi/4*180/np.pi), weights=weights, density=False)
+    axs[0].hist(abs_diff[:, 0], bins=30, range=(0, 2.0), weights=weights, density=False)
+    axs[1].hist(abs_diff[:, 1] * 180 / np.pi, bins=30, range=(0, np.pi / 20 * 180 / np.pi), weights=weights,
+                density=False)
+    axs[2].hist(abs_diff[:, 2] * 180 / np.pi, bins=30, range=(0, np.pi / 20 * 180 / np.pi), weights=weights,
+                density=False)
+    axs[3].hist(abs_diff[:, 3] * 180 / np.pi, bins=50, range=(0, np.pi / 4 * 180 / np.pi), weights=weights,
+                density=False)
 
     for idx in range(4):
         axs[idx].yaxis.set_major_formatter(PercentFormatter(xmax=1))
@@ -75,7 +79,7 @@ def calculate_v_stats(predictions, v_gt):
     print('Means (prediction, GT) : R({} , {}) Theta({} , {}) Psi({} , {}) Phi_rel({} , {})'.format(
         mean_pred[0], mean_v[0], mean_pred[1], mean_v[1], mean_pred[2], mean_v[2], mean_pred[3], mean_v[3]))
     # display mean absolute error
-    abs_diff = np.abs(predictions-v_gt)
+    abs_diff = np.abs(predictions - v_gt)
     mae = np.mean(abs_diff, axis=0)
     print('Absolute errors : Vx({}) Vy({}) Vz({}) Vyaw({})'.format(mae[0], mae[1], mae[2], mae[3]))
     # display max errors

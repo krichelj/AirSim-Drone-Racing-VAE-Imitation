@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import Model
-from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, Lambda, Concatenate, Conv2DTranspose, Reshape, ReLU
+
 
 class NonLinearTransformer(Model):
     def __init__(self):
@@ -18,10 +18,11 @@ class NonLinearTransformer(Model):
         self.network = tf.keras.Sequential([
             dense0,
             dense1,
-            dense2], 
+            dense2],
             name='nonlineartransformer')
 
         print('[NonLinearTransformer] Done with create_model')
+
 
 class TestNet(Model):
     def __init__(self):
@@ -40,7 +41,7 @@ class TestNet(Model):
         self.network = tf.keras.Sequential([
             dense0,
             dense1,
-            dense2], 
+            dense2],
             name='nonlineartransformer')
 
         print('[NonLinearTransformer] Done with create_model')

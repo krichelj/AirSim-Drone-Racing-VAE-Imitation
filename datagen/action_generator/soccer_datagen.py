@@ -4,7 +4,7 @@ import math
 import time
 import numpy as np
 import threading
-import os,sys
+import os, sys
 import airsimdroneracingvae
 import airsimdroneracingvae.types
 import airsimdroneracingvae.utils

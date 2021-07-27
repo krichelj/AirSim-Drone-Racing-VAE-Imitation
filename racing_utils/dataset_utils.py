@@ -1,21 +1,18 @@
-import os
-import h5py
 import numpy as np
-import matplotlib.pyplot as plt
 import tensorflow as tf
-import random
 import os
-import matplotlib.pyplot as plt
 import glob
-from PIL import Image
 import cv2
 from sklearn.model_selection import train_test_split
+
 
 def convert_bgr2rgb(img_bgr):
     return cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
 
+
 def convert_rgb2bgr(img_rgb):
     return cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+
 
 def normalize_v(v):
     # normalization of velocities from whatever to [-1, 1] range
@@ -39,6 +36,7 @@ def normalize_v(v):
         raise Exception('Error in data format of V shape: {}'.format(v.shape))
     return v
 
+
 def de_normalize_v(v):
     # normalization of velocities from [-1, 1] range to whatever
     v_x_range = [-1, 7]
@@ -61,10 +59,11 @@ def de_normalize_v(v):
         raise Exception('Error in data format of V shape: {}'.format(v.shape))
     return v
 
+
 def normalize_gate(pose):
     # normalization of velocities from whatever to [-1, 1] range
     r_range = [0.1, 20]
-    cam_fov = 90*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
+    cam_fov = 90 * 0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
     alpha = cam_fov / 180.0 * np.pi / 2.0  # alpha is half of fov angle
     theta_range = [-alpha, alpha]
     psi_range = [np.pi / 2 - alpha, np.pi / 2 + alpha]
@@ -86,10 +85,11 @@ def normalize_gate(pose):
         raise Exception('Error in data format of V shape: {}'.format(pose.shape))
     return pose
 
+
 def de_normalize_gate(pose):
     # normalization of velocities from [-1, 1] range to whatever
     r_range = [0.1, 20]
-    cam_fov = 90*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
+    cam_fov = 90 * 0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
     alpha = cam_fov / 180.0 * np.pi / 2.0  # alpha is half of fov angle
     theta_range = [-alpha, alpha]
     psi_range = [np.pi / 2 - alpha, np.pi / 2 + alpha]
@@ -110,6 +110,7 @@ def de_normalize_gate(pose):
     else:
         raise Exception('Error in data format of V shape: {}'.format(pose.shape))
     return pose
+
 
 def read_images(data_dir, res, max_size=None):
     print('Going to read image file list')
@@ -132,7 +133,7 @@ def read_images(data_dir, res, max_size=None):
         im = im / 255.0 * 2.0 - 1.0
         images_np[idx, :] = im
         if idx % 10000 == 0:
-            print ('image idx = {}'.format(idx))
+            print('image idx = {}'.format(idx))
         idx = idx + 1
         if idx == size_data:
             # reached the last point -- exit loop of images
@@ -140,6 +141,7 @@ def read_images(data_dir, res, max_size=None):
 
     print('Done reading {} images.'.format(images_np.shape[0]))
     return images_np
+
 
 def create_dataset_csv(data_dir, batch_size, res, max_size=None):
     print('Going to read file list')
@@ -163,7 +165,7 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
         im = im / 255.0 * 2.0 - 1.0
         images_np[idx, :] = im
         if idx % 10000 == 0:
-            print ('image idx = {}'.format(idx))
+            print('image idx = {}'.format(idx))
         idx = idx + 1
         if idx == size_data:
             # reached the last point -- exit loop of images
@@ -176,7 +178,9 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
 
     # sanity check
     if raw_table.shape[0] != images_np.shape[0]:
-        raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0], raw_table.shape[0]))
+        raise Exception(
+            'Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0],
+                                                                                            raw_table.shape[0]))
     raw_table.astype(np.float32)
 
     # print some useful statistics
@@ -197,22 +201,24 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
 
     return ds_train, ds_test
 
+
 def create_unsup_dataset_multiple_sources(data_dir_list, batch_size, res):
     # load all the images in one single large dataset
-    images_np = np.empty((0,res,res,3)).astype(np.float32)
+    images_np = np.empty((0, res, res, 3)).astype(np.float32)
     for data_dir in data_dir_list:
         img_array = read_images(data_dir, res, max_size=None)
         images_np = np.concatenate((images_np, img_array), axis=0)
     # make fake distances to gate as -1
     num_items = images_np.shape[0]
     print('Real_life dataset has {} images total'.format(num_items))
-    raw_table = (-1.0*np.ones((num_items, 4))).astype(np.float32)
+    raw_table = (-1.0 * np.ones((num_items, 4))).astype(np.float32)
     # separate the actual dataset:
     img_train, img_test, dist_train, dist_test = train_test_split(images_np, raw_table, test_size=0.1, random_state=42)
     # convert to tf format dataset and prepare batches
     ds_train = tf.data.Dataset.from_tensor_slices((img_train, dist_train)).batch(batch_size)
     ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
     return ds_train, ds_test
+
 
 def create_test_dataset_csv(data_dir, res, read_table=True):
     # prepare image dataset from a folder
@@ -229,7 +235,7 @@ def create_test_dataset_csv(data_dir, res, read_table=True):
         # notice that model was trained in BGR
         im = cv2.imread(file, cv2.IMREAD_COLOR)
         im = cv2.resize(im, (res, res))
-        im = im/255.0*2.0-1.0
+        im = im / 255.0 * 2.0 - 1.0
         images_np[idx, :] = im
         idx = idx + 1
 
@@ -240,7 +246,9 @@ def create_test_dataset_csv(data_dir, res, read_table=True):
     raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
     # sanity check
     if raw_table.shape[0] != images_np.shape[0]:
-        raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0], raw_table.shape[0]))
+        raise Exception(
+            'Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0],
+                                                                                            raw_table.shape[0]))
     raw_table.astype(np.float32)
 
     # print some useful statistics
@@ -252,6 +260,7 @@ def create_test_dataset_csv(data_dir, res, read_table=True):
 
     return images_np, raw_table
 
+
 def create_dataset_txt(data_dir, batch_size, res, data_mode='train', base_path=None):
     vel_table = np.loadtxt(data_dir + '/proc_vel.txt', delimiter=',').astype(np.float32)
     with open(data_dir + '/proc_images.txt') as f:
@@ -259,7 +268,9 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train', base_path=N
 
     # sanity check
     if vel_table.shape[0] != len(img_table):
-        raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(len(img_table), vel_table.shape[0]))
+        raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(len(img_table),
+                                                                                                        vel_table.shape[
+                                                                                                            0]))
 
     size_data = len(img_table)
     images_np = np.zeros((size_data, res, res, 3)).astype(np.float32)
@@ -276,7 +287,7 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train', base_path=N
         im = im / 255.0 * 2.0 - 1.0
         images_np[idx, :] = im
         if idx % 1000 == 0:
-            print ('image idx = {} out of {} images'.format(idx, size_data))
+            print('image idx = {} out of {} images'.format(idx, size_data))
         idx = idx + 1
         if idx == size_data:
             # reached the last point -- exit loop of images
@@ -302,10 +313,11 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train', base_path=N
     elif data_mode == 'test':
         return img_test, v_test
 
+
 def create_dataset_multiple_sources(data_dir_list, batch_size, res, data_mode='train', base_path=None):
     # load all the images and velocities in one single large dataset
-    images_np = np.empty((0,res,res,3)).astype(np.float32)
-    vel_table = np.empty((0,4)).astype(np.float32)
+    images_np = np.empty((0, res, res, 3)).astype(np.float32)
+    vel_table = np.empty((0, 4)).astype(np.float32)
     for data_dir in data_dir_list:
         img_array, v_array = create_dataset_txt(data_dir, batch_size, res, data_mode='test', base_path=base_path)
         images_np = np.concatenate((images_np, img_array), axis=0)

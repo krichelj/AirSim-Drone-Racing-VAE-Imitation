@@ -24,8 +24,8 @@ columns = 10
 rows = 10
 
 num_interp_z = 10
-idx_close = 0  #7
-idx_far = 1  #39
+idx_close = 0  # 7
+idx_far = 1  # 39
 
 z_range_mural = [-0.02, 0.02]
 z_num_mural = 11
@@ -43,9 +43,9 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(data_dir, img_res, read_table=read_table)
 print('Done with dataset')
 
-images_np = images_np[:1000,:]
+images_np = images_np[:1000, :]
 if read_table is True:
-    raw_table = raw_table[:1000,:]
+    raw_table = raw_table[:1000, :]
 
 # create model
 if latent_space_constraints is True:
@@ -74,14 +74,14 @@ if read_table is True:
 
 # show some reconstruction figures
 fig = plt.figure(figsize=(20, 20))
-for i in range(1, num_imgs_display+1):
-    idx_orig = (i-1)*2+1
+for i in range(1, num_imgs_display + 1):
+    idx_orig = (i - 1) * 2 + 1
     fig.add_subplot(rows, columns, idx_orig)
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[i - 1, :])
     plt.axis('off')
     plt.imshow(img_display)
-    fig.add_subplot(rows, columns, idx_orig+1)
-    img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i-1, :])
+    fig.add_subplot(rows, columns, idx_orig + 1)
+    img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i - 1, :])
     plt.axis('off')
     plt.imshow(img_display)
 fig.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_results.png'))
@@ -91,7 +91,6 @@ plt.show()
 z_close = z[idx_close, :]
 z_far = z[idx_far, :]
 z_interp = racing_utils.geom_utils.interp_vector(z_close, z_far, num_interp_z)
-
 
 # get the image predictions
 img_recon_interp, gate_recon_interp = model.decode(z_interp, mode=0)
@@ -107,16 +106,15 @@ indices = np.array([np.arange(num_interp_z)]).transpose()
 results = np.concatenate((indices, gate_recon_interp), axis=1)
 print('Img index | Predictions: = \n{}'.format(results))
 
-
 fig, axs = plt.subplots(1, 4, tight_layout=True)
 axs[0].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 0], 'b-', label='r')
-axs[1].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 1]*180/np.pi, 'b-', label=r'$\theta$')
-axs[2].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 2]*180/np.pi, 'b-', label=r'$\phi$')
-axs[3].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 3]*180/np.pi, 'b-', label=r'$\psi$')
+axs[1].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 1] * 180 / np.pi, 'b-', label=r'$\theta$')
+axs[2].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 2] * 180 / np.pi, 'b-', label=r'$\phi$')
+axs[3].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 3] * 180 / np.pi, 'b-', label=r'$\psi$')
 
 for idx in range(4):
     # axs[idx].grid()
-    y_ticks_array = gate_recon_interp[:, idx][np.array([0, gate_recon_interp[:, idx].shape[0]-1])]
+    y_ticks_array = gate_recon_interp[:, idx][np.array([0, gate_recon_interp[:, idx].shape[0] - 1])]
     y_ticks_array = np.around(y_ticks_array, decimals=1)
     if idx > 0:
         y_ticks_array = y_ticks_array * 180 / np.pi
@@ -143,7 +141,7 @@ img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_close, :]
 plt.axis('off')
 plt.imshow(img_display)
 for i in range(1, num_interp_z + 1):
-    fig2.add_subplot(rows, columns, i+1)
+    fig2.add_subplot(rows, columns, i + 1)
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp[i - 1, :])
     plt.axis('off')
     plt.imshow(img_display)
@@ -159,10 +157,10 @@ fig3 = plt.figure(figsize=(96, 96))
 columns = z_num_mural
 rows = n_z
 z_values = racing_utils.geom_utils.interp_vector(z_range_mural[0], z_range_mural[1], z_num_mural)
-for i in range(1, z_num_mural*n_z + 1):
+for i in range(1, z_num_mural * n_z + 1):
     fig3.add_subplot(rows, columns, i)
     z = np.zeros((1, n_z)).astype(np.float32)
-    z[0, (i-1)/columns] = z_values[i%columns-1]
+    z[0, (i - 1) / columns] = z_values[i % columns - 1]
     # print (z)
     img_recon_interp, gate_recon_interp = model.decode(z, mode=0)
     img_recon_interp = img_recon_interp.numpy()
