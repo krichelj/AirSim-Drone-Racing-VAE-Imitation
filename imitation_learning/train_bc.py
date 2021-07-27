@@ -1,6 +1,7 @@
 import tensorflow as tf
 import os
 import sys
+
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 
 # imports
@@ -12,20 +13,17 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-base_path = '/home/rb/all_files'
-data_dir_list = ['/home/rb/all_files/il_datasets/bc_v5_n0',
-                 '/home/rb/all_files/il_datasets/bc_v5_n1',
-                 '/home/rb/all_files/il_datasets/bc_v5_n2',
-                 '/home/rb/all_files/il_datasets/bc_v5_n3']
-output_dir = '/home/rb/all_files/model_outputs/bc_test'
+base_path = r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation'
+data_dir_list = [rf'{base_path}\il_datasets\bc_v5_n{i}' for i in range(3)]
+output_dir = rf'{base_path}\model_outputs\bc_test'
 
 training_mode = 'latent'  # 'full' or 'latent' or 'reg'
-cmvae_weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+cmvae_weights_path = fr'{base_path}\model_outputs\cmvae_con\cmvae_model_45.ckpt'
 # cmvae_weights_path = '/home/rb/all_files/model_outputs/cmvae_unc/cmvae_model_65.ckpt'
 # cmvae_weights_path = '/home/rb/all_files/model_outputs/cmvae_img/cmvae_model_45.ckpt'
 
 # training_mode = 'reg'  # 'full' or 'latent' or 'reg'
-# reg_weights_path = '/home/rb/all_files/model_outputs/reg/reg_model_25.ckpt'
+reg_weights_path = rf'{base_path}\model_outputs\reg\reg_model_25.ckpt'
 
 # training_mode = 'full'  # 'full' or 'latent' or 'reg'
 # no auxiliary feature extraction weights
@@ -36,6 +34,7 @@ epochs = 400
 img_res = 64
 max_size = None  # default is None
 learning_rate = 1e-2  # 1e-2 for latent, 1e-3 for full
+
 
 ###########################################
 # CUSTOM FUNCTIONS
@@ -82,6 +81,7 @@ def test(images, labels, training_mode):
     recon_loss = tf.reduce_mean(compute_loss(labels, predictions))
     test_loss_rec_v(recon_loss)
 
+
 ###########################################
 
 
@@ -97,7 +97,8 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 # load dataset
 print('Starting dataset')
 # train_ds, test_ds = racing_utils.dataset_utils.create_dataset_txt(data_dir, batch_size, img_res, data_mode='train')
-train_ds, test_ds = racing_utils.dataset_utils.create_dataset_multiple_sources(data_dir_list, batch_size, img_res, data_mode='train', base_path=base_path)
+train_ds, test_ds = racing_utils.dataset_utils.create_dataset_multiple_sources(data_dir_list, batch_size, img_res,
+                                                                               data_mode='train', base_path=base_path)
 print('Done with dataset')
 
 # create models
@@ -139,14 +140,13 @@ for epoch in range(epochs):
         test(test_images, test_labels, training_mode)
     # save model
     if epoch % 10 == 0 and epoch > 0:
-        print('Saving weights to {}'.format(output_dir))
-        bc_model.save_weights(os.path.join(output_dir, "bc_model_{}.ckpt".format(epoch)))
+        print(f'Saving weights to {output_dir}')
+        bc_model.save_weights(os.path.join(output_dir, f"bc_model_{epoch}.ckpt"))
 
     with metrics_writer.as_default():
         tf.summary.scalar('train_loss_rec_gate', train_loss_rec_v.result(), step=epoch)
         tf.summary.scalar('test_loss_rec_gate', test_loss_rec_v.result(), step=epoch)
-    print('Epoch {} | Train L_gate: {} | Test L_gate: {}'
-          .format(epoch, train_loss_rec_v.result(), test_loss_rec_v.result()))
+    print(f'Epoch {epoch} | Train L_gate: {train_loss_rec_v.result()} | Test L_gate: {test_loss_rec_v.result()}')
     reset_metrics()  # reset all the accumulators of metrics
 
 print('bla')

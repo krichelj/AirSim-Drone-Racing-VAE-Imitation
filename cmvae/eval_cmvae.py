@@ -12,10 +12,10 @@ import racing_models.cmvae
 import racing_utils
 
 # DEFINE TESTING META PARAMETERS
-data_dir = '/home/rb/all_files/airsim_datasets/soccer_1k'
+data_dir = r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\airsim_datasets\soccer_1k'
 read_table = True
 latent_space_constraints = True
-weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+weights_path = r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\model_outputs\cmvae_con\cmvae_model_45.ckpt'
 
 n_z = 10
 img_res = 64
@@ -84,7 +84,8 @@ for i in range(1, num_imgs_display + 1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i - 1, :])
     plt.axis('off')
     plt.imshow(img_display)
-fig.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_results.png'))
+fig.savefig(os.path.join(r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\pictures',
+                         'reconstruction_results.png'))
 plt.show()
 
 # show interpolation btw two images in latent space
@@ -149,7 +150,8 @@ fig2.add_subplot(rows, columns, num_interp_z + 2)
 img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_far, :])
 plt.axis('off')
 plt.imshow(img_display)
-fig2.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_interpolation_results.png'))
+fig2.savefig(os.path.join(r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\pictures',
+                          'reconstruction_interpolation_results.png'))
 plt.show()
 
 # new plot traveling through latent space
@@ -160,7 +162,7 @@ z_values = racing_utils.geom_utils.interp_vector(z_range_mural[0], z_range_mural
 for i in range(1, z_num_mural * n_z + 1):
     fig3.add_subplot(rows, columns, i)
     z = np.zeros((1, n_z)).astype(np.float32)
-    z[0, (i - 1) / columns] = z_values[i % columns - 1]
+    z[0, int((i - 1) / columns)] = z_values[int(i % columns - 1)]
     # print (z)
     img_recon_interp, gate_recon_interp = model.decode(z, mode=0)
     img_recon_interp = img_recon_interp.numpy()
@@ -168,5 +170,6 @@ for i in range(1, z_num_mural * n_z + 1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp)
     plt.axis('off')
     plt.imshow(img_display)
-fig3.savefig(os.path.join('/home/rb/Pictures', 'z_mural.png'))
+fig3.savefig(os.path.join(r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\pictures',
+                          'z_mural.png'))
 plt.show()

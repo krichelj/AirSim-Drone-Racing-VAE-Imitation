@@ -3,6 +3,7 @@ import tensorflow as tf
 import os
 import glob
 import cv2
+from pathlib import Path
 from sklearn.model_selection import train_test_split
 
 
@@ -268,9 +269,8 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train', base_path=N
 
     # sanity check
     if vel_table.shape[0] != len(img_table):
-        raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(len(img_table),
-                                                                                                        vel_table.shape[
-                                                                                                            0]))
+        raise Exception(f'Number of images ({len(img_table)}) different than number of entries in table '
+                        f'({vel_table.shape[0]}): ')
 
     size_data = len(img_table)
     images_np = np.zeros((size_data, res, res, 3)).astype(np.float32)
@@ -280,6 +280,7 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train', base_path=N
     for img_name in img_table:
         if base_path is not None:
             img_name = img_name.replace('/home/rb/data', base_path)
+
         # read data in BGR format by default!!!
         # notice that model is going to be trained in BGR
         im = cv2.imread(img_name, cv2.IMREAD_COLOR)
