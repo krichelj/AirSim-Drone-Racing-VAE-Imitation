@@ -3,10 +3,9 @@ import time
 import numpy as np
 import vel_regressor
 import cv2
-import math
-import tensorflow as tf
 
-import os, sys
+import os
+import sys
 import airsimdroneracingvae
 import airsimdroneracingvae.types
 import airsimdroneracingvae.utils
@@ -17,7 +16,6 @@ import_path = os.path.join(curr_dir, '..')
 sys.path.insert(0, import_path)
 import racing_utils
 
-
 ###########################################
 
 # DEFINE DEPLOYMENT META PARAMETERS
@@ -26,10 +24,12 @@ import racing_utils
 policy_type = 'bc_con'
 gate_noise = 1.0
 
+
 ###########################################
 
 def process_image(client, img_res):
-    image_response = client.simGetImages([airsimdroneracingvae.ImageRequest('0', airsimdroneracingvae.ImageType.Scene, False, False)])[0]
+    image_response = \
+    client.simGetImages([airsimdroneracingvae.ImageRequest('0', airsimdroneracingvae.ImageType.Scene, False, False)])[0]
     img_1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)  # get numpy array
     img_bgr = img_1d.reshape(image_response.height, image_response.width, 3)  # reshape array to 4 channel image array H X W X 3
     img_resized = cv2.resize(img_bgr, (img_res, img_res)).astype(np.float32)
@@ -42,10 +42,10 @@ def process_image(client, img_res):
 def move_drone(client, vel_cmd):
     # good multipliers originally: 0.4 for vel, 0.8 for yaw
     # good multipliers new policies: 0.8 for vel, 0.8 for yaw
-    vel_cmd[0:2] = vel_cmd[0:2] *1.0  # usually base speed is 3/ms
+    vel_cmd[0:2] = vel_cmd[0:2] * 1.0  # usually base speed is 3/ms
     vel_cmd[3] = vel_cmd[3] * 1.0
     # yaw rate is given in deg/s!! not rad/s
-    yaw_mode = airsimdroneracingvae.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3]*180.0/np.pi)
+    yaw_mode = airsimdroneracingvae.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3] * 180.0 / np.pi)
     client.moveByVelocityAsync(vel_cmd[0], vel_cmd[1], vel_cmd[2], duration=0.1, yaw_mode=yaw_mode)
 
 
@@ -82,7 +82,9 @@ if __name__ == "__main__":
     # spawn red gates in appropriate locations
     # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
     offset = [0, 0, -0]
-    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8, radius_noise=gate_noise, height_range=[0, -gate_noise], track_offset=offset)
+    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8,
+                                                                    radius_noise=gate_noise,
+                                                                    height_range=[0, -gate_noise], track_offset=offset)
 
     # wait till takeoff complete
     vel_max = 5.0
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     # takeoff_position = airsimdroneracingvae.Vector3r(25, -7, -1.5)
     # takeoff_orientation = airsimdroneracingvae.Vector3r(-.2, 0.9, 0)
 
-    takeoff_position = airsimdroneracingvae.Vector3r(5.5, -4, -1.5+offset[2])
+    takeoff_position = airsimdroneracingvae.Vector3r(5.5, -4, -1.5 + offset[2])
     takeoff_orientation = airsimdroneracingvae.Vector3r(0.4, 0.9, 0)
 
     # takeoff_position = airsimdroneracingvae.Vector3r(0, 0, -2)
@@ -104,7 +106,8 @@ if __name__ == "__main__":
     # takeoff_orientation = airsimdroneracingvae.Vector3r(1, 0, 0)
     # client.plot_tf([takeoff_pose], duration=20.0, vehicle_name=drone_name)
     # client.moveOnSplineAsync([airsimdroneracingvae.Vector3r(0, 0, -3)], vel_max=15.0, acc_max=5.0, vehicle_name=drone_name, viz_traj=True).join()
-    client.moveOnSplineVelConstraintsAsync([takeoff_position], [takeoff_orientation], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name, viz_traj=False).join()
+    client.moveOnSplineVelConstraintsAsync([takeoff_position], [takeoff_orientation], vel_max=vel_max, acc_max=acc_max,
+                                           vehicle_name=drone_name, viz_traj=False).join()
     # client.moveOnSplineVelConstraintsAsync([airsimdroneracingvae.Vector3r(1, 0, 8)], [airsimdroneracingvae.Vector3r(1, 0, 0)], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name, viz_traj=True)
 
     time.sleep(1.0)
@@ -162,8 +165,8 @@ if __name__ == "__main__":
         if count == max_count:
             count = 0
             avg_time = np.mean(times_net)
-            avg_freq = 1.0/avg_time
-            print('Avg network time over {} iterations: {} ms | {} Hz'.format(max_count, avg_time*1000, avg_freq))
+            avg_freq = 1.0 / avg_time
+            print('Avg network time over {} iterations: {} ms | {} Hz'.format(max_count, avg_time * 1000, avg_freq))
             avg_time = np.mean(times_loop)
             avg_freq = 1.0 / avg_time
             print('Avg loop time over {} iterations: {} ms | {} Hz'.format(max_count, avg_time * 1000, avg_freq))
