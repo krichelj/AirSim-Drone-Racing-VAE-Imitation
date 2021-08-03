@@ -1,21 +1,24 @@
-import tensorflow as tf
 import os
-import sys
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 
 # imports
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-import_path = os.path.join(curr_dir, '..')
-sys.path.insert(0, import_path)
+curr_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+import_path = curr_dir.parent
 import racing_models.cmvae
 import racing_utils
 
 # DEFINE TESTING META PARAMETERS
-data_dir = r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\airsim_datasets\soccer_1k'
+data_dir = Path(fr'{import_path}/airsim_datasets/soccer_1k')
 read_table = True
 latent_space_constraints = True
-weights_path = r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\model_outputs\cmvae_con\cmvae_model_45.ckpt'
+
+saved_models_path = fr'{import_path}/model_outputs/cmvae_con'
+epoch_num = max([int(f.split('_')[-1].split('.')[0])
+                     for f in os.listdir(saved_models_path) if f.endswith('.index')])
+
+weights_path = fr'{saved_models_path}/cmvae_model_{epoch_num}.ckpt'
 
 n_z = 10
 img_res = 64
@@ -40,7 +43,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 # Load test dataset
-images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(data_dir, img_res, read_table=read_table)
+images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(str(data_dir), img_res, read_table=read_table)
 print('Done with dataset')
 
 images_np = images_np[:1000, :]
@@ -84,8 +87,8 @@ for i in range(1, num_imgs_display + 1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i - 1, :])
     plt.axis('off')
     plt.imshow(img_display)
-fig.savefig(os.path.join(r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\pictures',
-                         'reconstruction_results.png'))
+p1 = Path(fr'{import_path}/pictures/reconstruction_results.png')
+fig.savefig(p1)
 plt.show()
 
 # show interpolation btw two images in latent space
@@ -150,8 +153,8 @@ fig2.add_subplot(rows, columns, num_interp_z + 2)
 img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_far, :])
 plt.axis('off')
 plt.imshow(img_display)
-fig2.savefig(os.path.join(r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\pictures',
-                          'reconstruction_interpolation_results.png'))
+p2 = Path(fr'{import_path}/pictures/reconstruction_interpolation_results.png')
+fig2.savefig(p2)
 plt.show()
 
 # new plot traveling through latent space
@@ -170,6 +173,6 @@ for i in range(1, z_num_mural * n_z + 1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp)
     plt.axis('off')
     plt.imshow(img_display)
-fig3.savefig(os.path.join(r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\pictures',
-                          'z_mural.png'))
+p3 = Path(fr'{import_path}/pictures/z_mural.png')
+fig2.savefig(p3)
 plt.show()

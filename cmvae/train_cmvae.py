@@ -13,7 +13,14 @@ import racing_utils
 data_dir = Path(fr'{import_path}/airsim_datasets/soccer_1k')
 output_dir = fr'{import_path}/model_outputs/cmvae_con'
 batch_size = 32
-epochs = 5000
+
+saved_models_path = fr'{import_path}/model_outputs/cmvae_con'
+epochs = max([int(f.split('_')[-1].split('.')[0])
+                     for f in os.listdir(saved_models_path) if f.endswith('.index')])
+
+weights_path = fr'{saved_models_path}/cmvae_model_{epochs}.ckpt'
+
+# epochs = 5000
 n_z = 10
 latent_space_constraints = True
 img_res = 64
@@ -164,6 +171,8 @@ if latent_space_constraints is True:
 else:
     model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
 
+model.load_weights(weights_path)
+
 # create optimizer
 optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 
@@ -184,7 +193,10 @@ if not os.path.isdir(output_dir):
 print('Start training ...')
 mode = 0
 flag = True
-for epoch in range(epochs):
+
+
+while True:
+    epoch = epochs
     # print('MODE NOW: {}'.format(mode))
     for train_images, train_labels in train_ds:
         train(train_images, train_labels, epoch, mode)
@@ -214,5 +226,7 @@ for epoch in range(epochs):
                     test_loss_rec_img.result() + test_loss_rec_gate.result() + test_loss_kl.result()
                     ))
         reset_metrics()  # reset all the accumulators of metrics
+
+    epochs += 1
 
 print('End of training')
