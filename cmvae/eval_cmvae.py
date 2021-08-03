@@ -87,7 +87,13 @@ for i in range(1, num_imgs_display + 1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i - 1, :])
     plt.axis('off')
     plt.imshow(img_display)
-p1 = Path(fr'{import_path}/pictures/reconstruction_results.png')
+
+pictures_path = Path(fr'{import_path}/pictures')
+
+if not pictures_path.is_dir():
+    os.mkdir(pictures_path)
+
+p1 = Path(fr'{pictures_path}/reconstruction_results.png')
 fig.savefig(p1)
 plt.show()
 
@@ -153,7 +159,7 @@ fig2.add_subplot(rows, columns, num_interp_z + 2)
 img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_far, :])
 plt.axis('off')
 plt.imshow(img_display)
-p2 = Path(fr'{import_path}/pictures/reconstruction_interpolation_results.png')
+p2 = Path(fr'{pictures_path}/reconstruction_interpolation_results.png')
 fig2.savefig(p2)
 plt.show()
 
@@ -173,6 +179,6 @@ for i in range(1, z_num_mural * n_z + 1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp)
     plt.axis('off')
     plt.imshow(img_display)
-p3 = Path(fr'{import_path}/pictures/z_mural.png')
+p3 = Path(fr'{pictures_path}/z_mural.png')
 fig2.savefig(p3)
 plt.show()
