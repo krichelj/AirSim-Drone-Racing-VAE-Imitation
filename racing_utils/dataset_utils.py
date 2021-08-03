@@ -174,7 +174,8 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
 
     print('Going to read csv file.')
     # prepare gate R THETA PSI PHI as np array reading from a file
-    raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
+    p = Path(str(data_dir) + '/gate_training_data.csv')
+    raw_table = np.loadtxt(str(p), delimiter=' ')
     raw_table = raw_table[:size_data, :]
 
     # sanity check

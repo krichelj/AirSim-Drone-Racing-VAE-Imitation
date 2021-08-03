@@ -1,20 +1,19 @@
 import tensorflow as tf
 import os
-import sys
+from pathlib import Path
 
-curr_dir = os.path.dirname(os.path.abspath(__file__))
+curr_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 
 # imports
-import_path = os.path.join(curr_dir, '..')
-sys.path.insert(0, import_path)
+import_path = curr_dir.parent
 import racing_models.cmvae
 import racing_utils
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\airsim_datasets\soccer_1k'
-output_dir = r'C:\Users\krichj\PycharmProjects\AirSim-Drone-Racing-VAE-Imitation\model_outputs\cmvae_con'
+data_dir = Path(fr'{import_path}/airsim_datasets/soccer_1k')
+output_dir = fr'{import_path}/model_outputs/cmvae_con'
 batch_size = 32
-epochs = 50
+epochs = 5000
 n_z = 10
 latent_space_constraints = True
 img_res = 64
